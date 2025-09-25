@@ -61,9 +61,11 @@ if ([string]::IsNullOrEmpty($installDir)) {
 if (-not (Test-Path $installDir)) {
     New-Item -ItemType Directory -Path $installDir -Force | Out-Null
     Write-Host "Created directory: $installDir"
-} else {
-    Write-Host "Directory already exists: $installDir"
 }
+if (-not (Test-Path "$installDir\temp")) {
+    New-Item -ItemType Directory -Path "$installDir\temp" -Force | Out-Null
+}
+
 Write-Host "Installing PSPAL to: $installDir`n"
 #endregion
 
@@ -75,15 +77,15 @@ $repo = "PSPAL"
 $zipUrl = "https://github.com/$owner/$repo/archive/refs/heads/main.zip"
 $localZip = "$InstallDir\temp\PSPAL.zip"
 
-Write-Host "Downloading $zipUrl..."
+Write-Host "Downloading $zipUrl..." -NoNewline
 Invoke-WebRequest -Uri $zipUrl -OutFile $localZip
-Write-Host "Done." -NoNewline
-Write-Host " Extracting files..."
+Write-Host "Done."
+Write-Host " Extracting files..." -NoNewline
 Expand-Archive -Path $localZip -DestinationPath "$InstallDir" -Force
-Write-Host "Done." -NoNewline
-Write-Host "Cleaning up..."
+Write-Host "Done."
+Write-Host "Cleaning up..." -NoNewline
 Remove-Item -Path $localZip
-Write-Host "Done." -NoNewline
+Write-Host "Done."
 
 #endregion
 
@@ -106,14 +108,16 @@ if (-not (Test-Path $profileSwitch)) {
 }
 
 $switchContent = @"
-# PSPAL Auto-Load
-if (`$env:WT_PROFILE_NAME -eq "PSPal") {
-    if (Test-Path "$installDir\PROFILE.ps1") {
-        . "$installDir\PROFILE.ps1"
+switch (`$env:WT_PROFILE_NAME) {
+    "PSPal" {
+        . $InstallDir\profile.ps1
     }
-} else if (`$env:WT_PROFILE_NAME -eq "PS") {
-    if (Test-Path "$profilePath") {
-        . "$profilePath"
+    "PS" {
+        . $profilePath
+    }
+    default {
+		write-warning "profile not identified. loading default"
+        . $profilePath    
     }
 }
 "@
@@ -123,6 +127,7 @@ Add-Content -Path $profileSwitch -Value $switchContent -Force
 
 #region Windows Terminal Profile
     $settingsPath = "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+    Copy-Item $settingsPath "$settingsPath.bak" -Force
 
     # Check if settings.json exists
     if (-not (Test-Path $settingsPath)) {
@@ -133,27 +138,42 @@ Add-Content -Path $profileSwitch -Value $switchContent -Force
             # Read the current settings
             $settings = Get-Content $settingsPath -Raw | ConvertFrom-Json
 
+            $palguid = "{" + ([guid]::NewGuid().ToString()) + "}"
+
             # Define the new profile
-            $newProfile = @{
+            $newPalProfile = @{
                 name = "PSPAL"
-                icon = "$installDir\\icons\\icon.ico"
+                icon = "$installDir\icons\icon.ico"
                 environment = @{
                     WT_PROFILE_NAME = "PSPal"
                 }
                 startingDirectory = "$env:USERPROFILE"
+                source = "Windows.Terminal.PowershellCore"
+                commandline = "pwsh.exe"
+                guid = $palguid
             }
 
-            $mainProfile = $settings.profiles.list | Where-Object { $_.name -eq "PowerShell"}
-            if (-not $mainProfile) {
-                Write-Warning "Main PowerShell profile not found in Windows Terminal settings."
-                $CTA = "please manually add environment = { WT_PROFILE_NAME = `"PS`"} to settings.json > profiles > list for the main profile"
-                Write-Host $CTA
-            } else {
-                $mainProfile.environment = @{ WT_PROFILE_NAME = "PS" }
+            $usrguid = "{" + ([guid]::NewGuid().ToString()) + "}"
+
+            $newUserProfile = @{
+                name = [System.Environment]::UserName.ToString()
+                icon = "$installDir\icons\icon.ico"
+                environment = @{
+                    WT_PROFILE_NAME = "PS"
+                }
+                startingDirectory = "$env:USERPROFILE"
+                source = "Windows.Terminal.PowershellCore"
+                commandline = "pwsh.exe"
+                guid = $usrguid
             }
 
-            # Add the new profile to the profiles list
-            $settings.profiles.list += $newProfile
+            # Add the new profiles to the profiles list
+            $settings.profiles.list += $newPalProfile
+            $settings.profiles.list += $newUserProfile
+
+            # Set the new profile as the default
+            $settings.defaultProfile = $usrguid
+
 
             # Save the updated settings
             $settings | ConvertTo-Json -Depth 10 | Set-Content $settingsPath -Force

@@ -115,6 +115,8 @@ if (Test-Path $pinnedPath) {
 
 . $PaletteRoot\Pluggins\browsing.ps1
 
+. $PaletteRoot\Pluggins\time.ps1
+
 
 # ALIASES ---------------------------------------------------------------#
 
