@@ -71,7 +71,7 @@ Write-Host "Installing PSPAL to: $installDir`n"
 Write-Host "`nDownloading PSPAL files from GitHub..."
 
 $owner = "gioacchinon"
-$repo = "DE3"
+$repo = "PSPAL"
 $zipUrl = "https://github.com/$owner/$repo/archive/refs/heads/main.zip"
 $localZip = "$InstallDir\temp\PSPAL.zip"
 
