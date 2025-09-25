@@ -77,14 +77,15 @@ $repo = "PSPAL"
 $zipUrl = "https://github.com/$owner/$repo/archive/refs/heads/main.zip"
 $localZip = "$InstallDir\temp\PSPAL.zip"
 
-Write-Host "Downloading $zipUrl..." -NoNewline
+Write-Host "⇩ Downloading $zipUrl..." -NoNewline
 Invoke-WebRequest -Uri $zipUrl -OutFile $localZip
 Write-Host "Done."
-Write-Host " Extracting files..." -NoNewline
-Expand-Archive -Path $localZip -DestinationPath "$InstallDir" -Force
+Write-Host "⁘ Extracting files..." -NoNewline
+Expand-Archive -Path $localZip -DestinationPath "$InstallDir\temp" -Force
+Move-Item -Path "$InstallDir\temp\$repo-main\*" -Destination $InstallDir -Force
 Write-Host "Done."
-Write-Host "Cleaning up..." -NoNewline
-Remove-Item -Path $localZip
+Write-Host "⁕ Cleaning up..." -NoNewline
+Remove-Item -Path "$InstallDir\temp" -Recurse -Force
 Write-Host "Done."
 
 #endregion
@@ -186,7 +187,7 @@ Add-Content -Path $profileSwitch -Value $switchContent -Force
 #endregion
 
 #region Create Startup Shortcut
-Write-Host "Creating startup shortcut..."
+Write-Host "Creating startup shortcut..." -NoNewline
 $startupFolder = [System.Environment]::GetFolderPath('Startup')
 $WScriptShell = New-Object -ComObject WScript.Shell
 $shortcut = $WScriptShell.CreateShortcut("$startupFolder\PSPAL.lnk")
@@ -194,12 +195,13 @@ $shortcut.TargetPath = "$InstallDir\ahk\PSPAL.exe"
 $shortcut.WorkingDirectory = "$InstallDir\ahk"
 $shortcut.IconLocation = "$InstallDir\icons\icon.ico"
 $shortcut.Save()
-Write-Host "Startup shortcut created at: $startupFolder\PSPAL.lnk"
+Start-Process "$InstallDir\ahk\PSPAL.exe"
+Write-Host "Done."
 #endregion
 
 #region Final Message
 Write-Host "`n============================================="
 Write-Host "   PSPAL has been installed to: $installDir"
-Write-Host "   Open a new terminal with the PSPAL profile to get started!"
+Write-Host "   Please restart Windows Terminal to see the new profile."
 Write-Host "=============================================`n"
 #endregion
