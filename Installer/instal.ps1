@@ -185,6 +185,18 @@ Add-Content -Path $profileSwitch -Value $switchContent -Force
     }
 #endregion
 
+#region Create Startup Shortcut
+Write-Host "Creating startup shortcut..."
+$startupFolder = [System.Environment]::GetFolderPath('Startup')
+$WScriptShell = New-Object -ComObject WScript.Shell
+$shortcut = $WScriptShell.CreateShortcut("$startupFolder\PSPAL.lnk")
+$shortcut.TargetPath = "$InstallDir\ahk\PSPAL.exe"
+$shortcut.WorkingDirectory = "$InstallDir\ahk"
+$shortcut.IconLocation = "$InstallDir\icons\icon.ico"
+$shortcut.Save()
+Write-Host "Startup shortcut created at: $startupFolder\PSPAL.lnk"
+#endregion
+
 #region Final Message
 Write-Host "`n============================================="
 Write-Host "   PSPAL has been installed to: $installDir"
