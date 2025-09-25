@@ -104,7 +104,10 @@ if (-not (Test-Path $profileSwitch)) {
     $profileDir = Split-Path $profilePath
     if (-not (Test-Path $profileDir)) {
         New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
+    } else {
+        Copy-Item -Path $profilePath -Destination "$profilePath.bak" -Force
     }
+    Copy-Item -Path $profileSwitch -Destination "$profilePath.bak" -Force
     Copy-Item -Path $profileSwitch -Destination "$profilePath" -Force
 }
 
@@ -123,7 +126,7 @@ switch (`$env:WT_PROFILE_NAME) {
 }
 "@
 
-Add-Content -Path $profileSwitch -Value $switchContent -Force
+Set-Content -Path $profileSwitch -Value $switchContent -Force
 #endregion
 
 #region Windows Terminal Profile
@@ -152,6 +155,7 @@ Add-Content -Path $profileSwitch -Value $switchContent -Force
                 source = "Windows.Terminal.PowershellCore"
                 commandline = "pwsh.exe"
                 guid = $palguid
+                hidden = $false 
             }
 
             $usrguid = "{" + ([guid]::NewGuid().ToString()) + "}"
@@ -166,6 +170,7 @@ Add-Content -Path $profileSwitch -Value $switchContent -Force
                 source = "Windows.Terminal.PowershellCore"
                 commandline = "pwsh.exe"
                 guid = $usrguid
+                hidden = $false 
             }
 
             # Add the new profiles to the profiles list
