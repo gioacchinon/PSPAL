@@ -1,13 +1,13 @@
 ﻿# settings for profile.ps1
-$UserFilesDir = "$env:USERPROFILE"
-$Editor = "notepad"
+$UserFilesDir = "E:\gioac"
+$Editor = "edit"
 $pinnedPath = "$PSScriptRoot\pinned.ps1"
 $logFilePath = "$PSScriptRoot\palette.log"
 $logtofile = $True
 $FavColor = "Yellow"
 $SearchEngine = "https://www.bing.com/search?q={query}"
 
-$NotesRoot = [Environment]::GetFolderPath("Desktop") + "\Notes"
+$NotesRoot = [Environment]::GetFolderPath("Documents") + "\Notes"
 $DefaultNote = "PerAsperaAdAstra"
 
 #ya can use this like WebSearch "hello" $imageSearch

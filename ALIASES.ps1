@@ -13,3 +13,4 @@ Set-Alias np Set-TemporaryHistory
 Set-Alias yp Set-PaletteHistory
 Set-Alias nnt New-Note
 Set-Alias gnt Get-Note
+Set-Alias rnt Remove-Note
