@@ -1,7 +1,7 @@
 function New-Note {
     param (
-        $title = "New Note",
         $content = "",
+        $title = "",
         $path = "$NotesRoot\$DefaultNote"
     )
 
@@ -30,9 +30,9 @@ $content
 
 function Get-Note {
     param (
+        $searchterm = $null,
         $index = -1,
-        $path = "$NotesRoot\$DefaultNote",
-        $searchterm = $null
+        $path = "$NotesRoot\$DefaultNote"
     )
     if (-not (Test-Path $path)) {
         Write-Host "No notes found at $path"
