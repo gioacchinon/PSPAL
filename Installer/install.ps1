@@ -139,9 +139,11 @@ try {
         New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
     }
 
-    # Backup and copy user profile
+    # Backup and copy or create user profile
     if (Test-Path $profilePath) {
         Copy-Item -Path $profilePath -Destination "$profilePath.bak" -Force
+    } else {
+        New-Item -ItemType File -Path $profilePath -Force | Out-Null
     }
 
     # Backup existing profile switch
