@@ -4,10 +4,10 @@
 #>
 
 #region Welcome
-Write-Host "============================================="
-Write-Host "   Welcome to the PSPAL Installer!"
+Write-Host "============================================================"
+Write-Host "   PSPAL Installer"
 Write-Host "   This script will download and set up PSPAL for you."
-Write-Host "=============================================`n"
+Write-Host "============================================================`n"
 $proceed = Read-Host "Do you want to proceed? (y/n)"
 if ($proceed -ne "y") {
     exit
@@ -15,6 +15,7 @@ if ($proceed -ne "y") {
 #endregion
 
 #region Requirements
+$needsWinget = $false
 # check for PowerShell 5.1 or higher
 if ($PSVersionTable.PSVersion.Major -lt 5) {
     Write-Host "PSPAL is designed to run on PowerShell 5.1 or higher. Do you want to continue and install it's last version? (y/n)"
@@ -22,7 +23,8 @@ if ($PSVersionTable.PSVersion.Major -lt 5) {
     if ($continue -ne "y") {
         exit
     }
-    winget install --id=Microsoft.PowerShell --source=winget
+    $InstallPWSH = $true
+    $needsWinget = $true
     Write-Host "Note: this script will continue on this instance of PowerShell, there's no need to restart it now."
 }
 #check for Windows Terminal
@@ -33,7 +35,8 @@ if (-not (Get-Command wt.exe -ErrorAction SilentlyContinue)) {
         Write-Host "Windows Terminal is required for PSPAL. Exiting installer."
         exit
     }
-    winget install --id=Microsoft.WindowsTerminal --source=winget
+    $InstallTerminal = $true
+    $needsWinget = $true
     Write-Host "Note: this script will continue on this instance of PowerShell, there's no need to restart it now."
 }
 
@@ -43,10 +46,36 @@ if (-not (Get-Command ahk.exe -ErrorAction SilentlyContinue)) {
     Write-Host "An .ahk script, and its compiled, will be included in the installation. [Ctrl+Alt+Space] -> wt.exe -p 'PSPal'."
     Write-host "Do you want to install AutoHotkey? (y/n)"
     $installAHK = Read-Host
+    #pratically convert to boolean
     if ($installAHK -eq "y") {
-        winget install --id=AutoHotkey.AutoHotkey --source=winget
+        $installAHK = $true
+        $needsWinget = $true
+    } else {
+        $installAHK = $false
     }
 }
+
+#check for winget
+if ($needsWinget -and -not (Get-Command winget.exe -ErrorAction SilentlyContinue)) {
+    Write-Warning "Winget (Windows Package Manager) is not available on this system."
+    Write-Host "Winget is required to install missing components."
+    Write-Host "You can install it by downloading 'App Installer' from the Microsoft Store:"
+    Write-Host "→ https://apps.microsoft.com/store/detail/app-installer/9NBLGGH4NNS1"
+    Write-Host "After installing, restart this script."
+    exit
+}
+
+if ($InstallPWSH) {
+    winget install --id Microsoft.PowerShell -e --source winget
+}
+if ($InstallTerminal) {
+    winget install --id Microsoft.WindowsTerminal -e --source winget
+}
+if ($installAHK) {
+    winget install --id AutoHotkey.AutoHotkey -e --source winget
+}
+
+
 #endregion
 
 #region Install Directory
@@ -77,41 +106,51 @@ $repo = "PSPAL"
 $zipUrl = "https://github.com/$owner/$repo/archive/refs/heads/main.zip"
 $localZip = "$InstallDir\temp\PSPAL.zip"
 
-Write-Host "⇩ Downloading $zipUrl..." -NoNewline
-Invoke-WebRequest -Uri $zipUrl -OutFile $localZip
-Write-Host "Done."
-Write-Host "⁘ Extracting files..." -NoNewline
-Expand-Archive -Path $localZip -DestinationPath "$InstallDir\temp" -Force
-Move-Item -Path "$InstallDir\temp\$repo-main\*" -Destination $InstallDir -Force
-Write-Host "Done."
-Write-Host "⁕ Cleaning up..." -NoNewline
-Remove-Item -Path "$InstallDir\temp" -Recurse -Force
-Write-Host "Done."
-
+try {
+    Write-Host "⬇️ Downloading $zipUrl..." -NoNewline
+    Invoke-WebRequest -Uri $zipUrl -OutFile $localZip
+    Write-Host "Done.✨"
+    Write-Host "📤 Extracting files..." -NoNewline
+    Expand-Archive -Path $localZip -DestinationPath "$InstallDir\temp" -Force
+    Move-Item -Path "$InstallDir\temp\$repo-main\*" -Destination $InstallDir -Force
+    Write-Host "Done.✨"
+    Write-Host "🫧 Cleaning up..." -NoNewline
+    Remove-Item -Path "$InstallDir\temp" -Recurse -Force
+    Write-Host "Done.✨"
+}
+catch {
+    Write-Warning "Failed to download or extract PSPAL files: $_"
+    exit
+}
 #endregion
 
 #region Update PowerShell Profile
 Write-Host "`nUpdating PowerShell profile..."
-$profileSwitch = $PROFILE
-$profilePath = Read-Host "Where do you want your current user profile to be moved to? (default: $env:USERPROFILE\profile\user.ps1)"
-if ([string]::IsNullOrEmpty($profilePath)) {
-    $profilePath = "$env:USERPROFILE\profile\user.ps1"
-}
+try {
+    $profileSwitch = $PROFILE
+    $profilePath = Read-Host "Where do you want your current user profile to be moved to? (default: $env:USERPROFILE\profile\user.ps1)"
+    if ([string]::IsNullOrEmpty($profilePath)) {
+        $profilePath = "$env:USERPROFILE\profile\user.ps1"
+    }
 
-if (-not (Test-Path $profileSwitch)) {
-    New-Item -ItemType File -Path $profileSwitch -Force | Out-Null
-} else {
+    # Ensure destination directory exists
     $profileDir = Split-Path $profilePath
     if (-not (Test-Path $profileDir)) {
         New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
-    } else {
+    }
+
+    # Backup and copy user profile
+    if (Test-Path $profilePath) {
         Copy-Item -Path $profilePath -Destination "$profilePath.bak" -Force
     }
-    Copy-Item -Path $profileSwitch -Destination "$profilePath.bak" -Force
-    Copy-Item -Path $profileSwitch -Destination "$profilePath" -Force
-}
 
-$switchContent = @"
+    # Backup existing profile switch
+    if (Test-Path $profileSwitch) {
+        Copy-Item -Path $profileSwitch -Destination "$profileSwitch.bak" -Force
+        Copy-Item -Path $profileSwitch -Destination $profilePath -Force
+    }
+
+    $switchContent = @"
 switch (`$env:WT_PROFILE_NAME) {
     "PSPal" {
         . $InstallDir\profile.ps1
@@ -120,13 +159,19 @@ switch (`$env:WT_PROFILE_NAME) {
         . $profilePath
     }
     default {
-		write-warning "profile not identified. loading default"
+        write-warning "profile not identified. loading default"
         . $profilePath    
     }
 }
 "@
 
-Set-Content -Path $profileSwitch -Value $switchContent -Force
+    Set-Content -Path $profileSwitch -Value $switchContent -Force
+    Write-Host "PowerShell profile updated.✨"
+}
+catch {
+    Write-Warning "Failed to update PowerShell profile: $_"
+}
+
 #endregion
 
 #region Windows Terminal Profile
@@ -152,7 +197,6 @@ Set-Content -Path $profileSwitch -Value $switchContent -Force
                     WT_PROFILE_NAME = "PSPal"
                 }
                 startingDirectory = "$env:USERPROFILE"
-                source = "Windows.Terminal.PowershellCore"
                 commandline = "pwsh.exe"
                 guid = $palguid
                 hidden = $false 
@@ -162,12 +206,11 @@ Set-Content -Path $profileSwitch -Value $switchContent -Force
 
             $newUserProfile = @{
                 name = [System.Environment]::UserName.ToString()
-                icon = "$installDir\icons\icon.ico"
+                icon = "ms-appx:///ProfileIcons/pwsh.png"
                 environment = @{
                     WT_PROFILE_NAME = "PS"
                 }
                 startingDirectory = "$env:USERPROFILE"
-                source = "Windows.Terminal.PowershellCore"
                 commandline = "pwsh.exe"
                 guid = $usrguid
                 hidden = $false 
@@ -184,9 +227,9 @@ Set-Content -Path $profileSwitch -Value $switchContent -Force
             # Save the updated settings
             $settings | ConvertTo-Json -Depth 10 | Set-Content $settingsPath -Force
 
-            Write-Host "Windows Terminal profile 'PSPal' added and set as default."
+            Write-Host "Windows Terminal profile 'PSPal' added and set as default.✨"
         } catch {
-            Write-Warning "Failed to update Windows Terminal settings: $_"
+            Write-Warning "Failed to update Windows Terminal settings: $_" 
         }
     }
 #endregion
@@ -205,8 +248,8 @@ Write-Host "Done."
 #endregion
 
 #region Final Message
-Write-Host "`n============================================="
+Write-Host "`n============================================================"
 Write-Host "   PSPAL has been installed to: $installDir"
-Write-Host "   Please restart Windows Terminal to see the new profile."
-Write-Host "=============================================`n"
+Write-Host "   Press [Ctrl]+[Alt]+[Space] 🛸"
+Write-Host "============================================================`n"
 #endregion
