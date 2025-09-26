@@ -22,7 +22,9 @@ function Test-Settings {
         'logtofile',
         'Editor',
         'FavColor',
-        'SearchEngine'
+        'SearchEngine',
+        'NotesRoot',
+        'DefaultNote'
     )
 
     $missingVars = @()
