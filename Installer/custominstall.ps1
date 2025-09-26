@@ -101,9 +101,11 @@ Write-Host "Installing PSPAL to: $installDir`n"
 #region Download Files
 
 #check for custom local zip
-if (Test-Path ".\customPspal.zip") {
-    Write-Host "Local PSPAL.zip found. Using it for installation..." -NoNewline
-    $localZip = ".\customPspal.zip"
+
+if (Test-Path ".\customPspal.touse.zip") {
+    Write-Host "Local zip found. Using it for installation..." -NoNewline
+    Move-Item ".\customPspal.touse.zip" "$installDir\temp\Pspal.zip" -Force
+    $localZip = "$installDir\temp\Pspal.zip"
 } else {
     Write-Host "`nDownloading PSPAL files..."
 
