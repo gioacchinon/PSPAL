@@ -7,8 +7,7 @@ $logtofile = $True
 $FavColor = "Yellow"
 $SearchEngine = "https://www.bing.com/search?q={query}"
 
-$NotesRoot = [Environment]::GetFolderPath("Documents") + "\Notes"
-$DefaultNote = "PerAsperaAdAstra"
+$NotesPath = [Environment]::GetFolderPath("MyDocuments") + "\Notes\PerAsperaAdAstra"
 
 #ya can use this like WebSearch "hello" $imageSearch
 $ImageSearch = "https://www.bing.com/images/search?q={query}"

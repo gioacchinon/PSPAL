@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes App</title>
+    <style>
+        body {
+            color: #dbcec6;
+            font-family: monospace;
+            background: radial-gradient(circle at left, #ffe1c9, rgb(0 76 104) 10%, #000000 40%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #title {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            color: #dbcec6;
+        }
+
+        button#add-note {
+            appearance: none;
+            border: none;
+            border-radius: 50%;
+            height: 50px;
+            width: 50px;
+            font-size: 25px;
+            font-weight: 700;
+            background: rgb(255 176 0);
+            box-shadow: inset 5px -3px 0px #fffcdf;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        button#add-note:hover {
+            transform: scale(1.05);
+            box-shadow: inset 3px -3px 7px #ffffff;
+        }
+
+        #note-form {
+            background: rgba(22, 22, 22, 0.5);
+            padding: 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 49, 255, 0.25);
+            margin-bottom: 50px;
+            display: none;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        #note-form h2 {
+            margin-top: 0;
+            color: #dbcec6;
+        }
+
+        #note-form input,
+        #note-form textarea {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: none;
+            border: none;
+            color: #dbcec6;
+            font-family: monospace;
+            resize: none;
+            width: -webkit-fill-available;
+        }
+
+        #note-form input::placeholder,
+        #note-form textarea::placeholder {
+            color: rgba(219, 206, 198, 0.5);
+        }
+
+        #note-form button {
+            background: #ffd700;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: inset 5px -6px 0px #ffffff;
+            transition: all 1s;
+        }
+
+        #note-form button:hover {
+            background: #ffcc00;
+            border-radius: 25px;
+            box-shadow: inset 8px -6px 20px 0 #ffffff;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            flex-direction: row;
+        }
+
+        li.note {
+            background: rgba(22, 22, 22, 0.3);
+            max-width: 300px;
+            min-width: 250px;
+            padding: 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(45px);
+            border: 1px solid rgba(0, 49, 255, 0.25);
+            height: fit-content;
+        }
+
+        li.note h3 {
+            margin-top: 0;
+            color: #dbcec6;
+            font-size: 1.5em;
+        }
+
+        li.note p {
+            color: wheat;
+            word-break: break-word;
+            font-size: 15px;
+        }
+
+        li.note button {
+            background: rgba(255, 0, 0, 0.3);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: #dbcec6;
+            font-family: monospace;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+            margin-left: calc(100% - 30px);
+        }
+
+        li.note button:hover {
+            background: rgba(255, 0, 0, 0.5);
+        }
+        
+        input#note-title {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        em {
+            color: #696969;
+        }
+
+        .endo {
+            border-top: 1px solid #ffffff21;
+            margin-top: 6px;
+            padding-top: 6px;
+        }
+
+        textarea#note-content {
+            font-size: 15px;
+            color: wheat;
+        }
+
+        input#note-title:focus-visible, textarea#note-content:focus-visible {
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+    <span id="title">
+            <h1>Notes</h1>
+            <button id="add-note" onclick="toggleForm()">+</button>
+    </span>
+    <div id="note-form">
+        <input type="text" id="note-title" placeholder="Title" required>
+        <textarea id="note-content" placeholder="Content" rows="4" required></textarea>
+        <button onclick="addNote()">Save Note</button>
+    </div>
+    <div id="notes-list">
+        {{notes}}
+    </div>
+
+    <script>
+        function toggleForm() {
+            const form = document.getElementById('note-form');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function addNote() {
+            const title = document.getElementById('note-title').value;
+            const content = document.getElementById('note-content').value;
+            if (!title || !content) {
+                alert('Title and content are required!');
+                return;
+            }
+            fetch('/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ Title: title, Content: content }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Note added!');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error);
+                });
+        }
+
+        function remove(id) {
+            if (confirm('Are you sure you want to delete this note?')) {
+                fetch('/', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: id }),
+                })
+                    .catch(error => {
+                        alert('Error: ' + error);
+                    });
+            }
+        }
+    </script>
+</body>
+
+</html>

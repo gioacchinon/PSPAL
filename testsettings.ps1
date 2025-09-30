@@ -23,8 +23,7 @@ function Test-Settings {
         'Editor',
         'FavColor',
         'SearchEngine',
-        'NotesRoot',
-        'DefaultNote'
+        'NotesPath'
     )
 
     $missingVars = @()
