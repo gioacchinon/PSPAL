@@ -17,7 +17,7 @@ function PinURLandFile {
         [string]$aliasName
     )
     $entry = "function global:$aliasname {'msedge' --app=`"$URL`"}"
-    Add-Content -Path $pinnePath -Value $entry
+    Add-Content -Path $pinnedPath -Value $entry
     . $pinnedPath
     Write-Host "Pinned $URL as $aliasName." -ForegroundColor Green
     Log "Pinned application $URL as $aliasName."
