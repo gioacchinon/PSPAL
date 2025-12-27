@@ -1,40 +1,70 @@
-#ToDo: unify above functions into one that automatically distinguish between apps, commands, files or web urls
+function Pin {
+    param(
+        [Parameter(Mandatory)]
+        [string]$InputItem,
 
-function PinApp {
-    param (
-        [string]$appPath,
-        [string]$aliasName
+        [Parameter(Mandatory)]
+        [string]$AliasName
     )
 
-    $entry = "function global:$aliasName {start-process `"$appPath`"}"
-    Add-Content -Path $pinnedPath -Value $entry
-    . $pinnedPath
-    Add-Content -Path $predictorPinnedPath -Value $aliasName
-    Write-Host "Pinned $appPath as $aliasName." -ForegroundColor Green
-    Log "Pinned application $appPath as $aliasName."
-}
+    # --- DETECTION LOGIC ---
+    $isURL      = $InputItem -match '^(http|https)://'
+    $isFile     = Test-Path $InputItem
+    $cmd        = Get-Command $InputItem -ErrorAction SilentlyContinue
+    $isCommand  = $cmd -ne $null
+    $isExe      = $isFile -and ($InputItem -match '\.(exe|bat|cmd|ps1)$')
 
-function PinCommand {
-    param (
-        [string]$command
-    )
-    Add-Content -Path $predictorPinnedPath -Value $command
-}
+    # protocol, but not drive letter
+    $isProtocol = ($InputItem -match '^[a-zA-Z][a-zA-Z0-9+\-.]*:') -and
+                  -not ($InputItem -match '^[a-zA-Z]:\\')
 
-function PinURLandFile {
-    param (
-        [string]$URL,
-        [string]$aliasName
-    )
-    $entry = "function global:$aliasname {start-process 'msedge' --app=`"$URL`"}"
-    Add-Content -Path $pinnedPath -Value $entry
-    . $pinnedPath
-    
-    Add-Content -Path $predictorPinnedPath -Value $aliasName
-    Write-Host "Pinned $URL as $aliasName." -ForegroundColor Green
-    Log "Pinned application $URL as $aliasName."
-}
+    # --- ACTION LOGIC ---
+    if ($isURL) {
+        $entry = "function global:$AliasName { start-process 'msedge' --app=`"$InputItem`" }"
+        Add-Content -Path $pinnedPath -Value "`r`n$entry"
+        . $pinnedPath
 
+        Add-Content -Path $predictorPinnedPath -Value "`r`n$AliasName"
+        Write-Host "Pinned URL $InputItem as $AliasName." -ForegroundColor Green
+        Log "Pinned URL $InputItem as $AliasName."
+    }
+    elseif ($isFile) {
+        $entry = "function global:$AliasName { start-process `"$InputItem`" }"
+        Add-Content -Path $pinnedPath -Value "`r`n$entry"
+        . $pinnedPath
+
+        Add-Content -Path $predictorPinnedPath -Value "`r`n$AliasName"
+        Write-Host "Pinned file $InputItem as $AliasName." -ForegroundColor Green
+        Log "Pinned file $InputItem as $AliasName."
+    }
+    elseif ($isProtocol -and -not $isURL) {
+        $entry = "function global:$AliasName { start-process `"$InputItem`" }"
+        Add-Content -Path $pinnedPath -Value "`r`n$entry"
+        . $pinnedPath
+
+        Add-Content -Path $predictorPinnedPath -Value "`r`n$AliasName"
+        Write-Host "Pinned protocol $InputItem as $AliasName." -ForegroundColor Green
+        Log "Pinned protocol $InputItem as $AliasName."
+    }
+    elseif ($isExe) {
+        $entry = "function global:$AliasName { start-process `"$InputItem`" }"
+        Add-Content -Path $pinnedPath -Value "`r`n$entry"
+        . $pinnedPath
+
+        Add-Content -Path $predictorPinnedPath -Value "`r`n$AliasName"
+        Write-Host "Pinned application $InputItem as $AliasName." -ForegroundColor Green
+        Log "Pinned application $InputItem as $AliasName."
+    }
+    elseif ($isCommand) {
+        Add-Content -Path $predictorPinnedPath -Value $InputItem
+        Write-Host "Pinned command '$InputItem'." -ForegroundColor Green
+        Log "Pinned command $InputItem."
+    }
+    else {
+        Write-Host "Could not determine type of input: $InputItem" -ForegroundColor Yellow
+        Log "Failed to pin: $InputItem" "WARNING"
+    }
+}
 function Get-Pinned {
     if (Test-Path $pinnedPath) {
         Get-Content $pinnedPath | ForEach-Object { Write-Host $_ -ForegroundColor Cyan }

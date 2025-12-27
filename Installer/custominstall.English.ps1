@@ -43,7 +43,7 @@ if (-not (Get-Command wt.exe -ErrorAction SilentlyContinue)) {
 #optional check for AutoHotkey
 if (-not (Get-Command ahk.exe -ErrorAction SilentlyContinue)) {
     Write-Host "AutoHotkey is not required, but it's useful for customizing how PSPAL starts."
-    Write-Host "An .ahk script, and its compiled, will be included in the installation. [Ctrl+Alt+Space] -> wt.exe -p 'PSPal'."
+    Write-Host "An .ahk script, and its compiled, will be included in the installation. [Alt+Space] -> wt.exe -p 'PSPal'."
     Write-host "Do you want to install AutoHotkey? (y/n)"
     $installAHK = Read-Host
     #pratically convert to boolean
@@ -177,7 +177,6 @@ switch (`$env:WT_PROFILE_NAME) {
         . $profilePath
     }
     default {
-        write-warning "profile not identified. loading default"
         . $profilePath    
     }
 }
@@ -268,6 +267,6 @@ Write-Host "Done."
 #region Final Message
 Write-Host "`n============================================================"
 Write-Host "   PSPAL has been installed to: $installDir"
-Write-Host "   Press [Ctrl]+[Alt]+[Space] 🛸"
+Write-Host "   Press [Alt]+[Space] 🛸"
 Write-Host "============================================================`n"
 #endregion

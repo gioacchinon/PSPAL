@@ -38,14 +38,16 @@ function Log {
 }
 
 #history management
-$historyLifeCountPath = "$PaletteRoot\.historylifecount"
-$historyLifeCount = Get-Content $historyLifeCountPath
-$historyLifeCount += 1
-if ($HistoryLifespan = $historyLifeCount) {
-    Set-Content -Path "$PaletteRoot\Predictor\history" -Value ""
-    $historyLifeCount = 1
+if ($HistoryLifespan -gt 0) {
+    $historyLifeCountPath = "$PaletteRoot\.historylifecount"
+    $historyLifeCount = [int](Get-Content $historyLifeCountPath)
+    $historyLifeCount += 1
+    if ($HistoryLifespan -lt $historyLifeCount) {
+        Set-Content -Path "$PaletteRoot\Predictor\history" -Value ""
+        $historyLifeCount = 1
+    }
+    Set-Content -Path $historyLifeCountPath -Value $historyLifeCount
 }
-Set-Content -Path $historyLifeCountPath -Value $historyLifeCount
 
 # INTERFACE -------------------------------------------------------------#
 

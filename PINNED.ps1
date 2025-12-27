@@ -14,3 +14,4 @@ function global:github {start-process 'msedge' --app="https://github.com"}
 function global:m365 {start-process 'msedge' --app="https://cloud.microsoft"}
 function global:mywifi {Start-Process "netsh.exe" -ArgumentList "wlan connect name=GF5L"}
 function global:mail {start-process "ms-outlook:"}
+function global:samurai { start-process "E:\gioac\Desktop\Personal Temp\New folder (2)\samurai.png" }
