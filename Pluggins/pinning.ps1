@@ -1,3 +1,5 @@
+#ToDo: unify above functions into one that automatically distinguish between apps, commands, files or web urls
+
 function PinApp {
     param (
         [string]$appPath,
@@ -7,8 +9,16 @@ function PinApp {
     $entry = "function global:$aliasName {start-process `"$appPath`"}"
     Add-Content -Path $pinnedPath -Value $entry
     . $pinnedPath
+    Add-Content -Path $predictorPinnedPath -Value $aliasName
     Write-Host "Pinned $appPath as $aliasName." -ForegroundColor Green
     Log "Pinned application $appPath as $aliasName."
+}
+
+function PinCommand {
+    param (
+        [string]$command
+    )
+    Add-Content -Path $predictorPinnedPath -Value $command
 }
 
 function PinURLandFile {
@@ -16,9 +26,11 @@ function PinURLandFile {
         [string]$URL,
         [string]$aliasName
     )
-    $entry = "function global:$aliasname {'msedge' --app=`"$URL`"}"
+    $entry = "function global:$aliasname {start-process 'msedge' --app=`"$URL`"}"
     Add-Content -Path $pinnedPath -Value $entry
     . $pinnedPath
+    
+    Add-Content -Path $predictorPinnedPath -Value $aliasName
     Write-Host "Pinned $URL as $aliasName." -ForegroundColor Green
     Log "Pinned application $URL as $aliasName."
 }

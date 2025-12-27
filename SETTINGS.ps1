@@ -7,9 +7,16 @@ $logtofile = $True
 $FavColor = "Yellow"
 $SearchEngine = "https://www.bing.com/search?q={query}"
 
+$HistoryLifespan = 0 #in palette instances, 0: persistent
+$predictorPinnedPath = "$PSScriptRoot\Predictor\pinned"
+
 $NotesPath = [Environment]::GetFolderPath("MyDocuments") + "\Notes\PerAsperaAdAstra"
 
-#ya can use this like WebSearch "hello" $imageSearch
+#ya can use this like `WebSearch "hello" $imageSearch`
 $ImageSearch = "https://www.bing.com/images/search?q={query}"
 $VideoSearch = "https://www.bing.com/videos/search?q={query}"
 $Translate = "https://www.bing.com/translator?from=&to=en&text={query}"
+$copilot = "https://copilot.microsoft.com/?q={query}"
+$lechat = "https://chat.mistral.ai/chat?q={query}"
+
+$ptemp = [Environment]::GetFolderPath("Desktop") + "\Personal Temp"

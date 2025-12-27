@@ -37,6 +37,15 @@ function Log {
     }
 }
 
+#history management
+$historyLifeCountPath = "$PaletteRoot\.historylifecount"
+$historyLifeCount = Get-Content $historyLifeCountPath
+$historyLifeCount += 1
+if ($HistoryLifespan = $historyLifeCount) {
+    Set-Content -Path "$PaletteRoot\Predictor\history" -Value ""
+    $historyLifeCount = 1
+}
+Set-Content -Path $historyLifeCountPath -Value $historyLifeCount
 
 # INTERFACE -------------------------------------------------------------#
 
@@ -61,7 +70,7 @@ foreach ($line in $welcome.Split("`n")) {
     Write-Host $line -ForegroundColor $color
 }
 
-Log $welcome
+Log "started"
 
 # Set a custom prompt
 function Prompt {
@@ -100,8 +109,12 @@ function Set-TemporaryHistory {
 }
 
 function Set-PaletteHistory {
-    Set-PSReadLineOption -HistorySavePath "$PaletteRoot\palette_history.txt"
-    Remove-Item $PaletteRoot\temp_palette_history.txt -ErrorAction SilentlyContinue
+    $historyPath = "$PaletteRoot\Predictor\history"
+
+    Set-PSReadLineOption -HistorySavePath $historyPath
+    Set-PSReadLineOption -HistorySaveStyle SaveIncrementally
+
+    Remove-Item "$PaletteRoot\temp_palette_history.txt" -ErrorAction SilentlyContinue
 }
 
 # PLUGINS ---------------------------------------------------------------#
@@ -124,4 +137,17 @@ if (Test-Path $pinnedPath) {
 
 . $PaletteRoot\aliases.ps1
 
+# PREDICTOR -------------------------------------------------------------#
+
 Set-PaletteHistory
+
+$predictorDll = Join-Path $PaletteRoot "Predictor\PSPALPredictor.dll"
+if (Test-Path $predictorDll) {
+    try {
+        Set-PSReadLineOption -PredictionSource Plugin
+        Import-Module $predictorDll -Force -ErrorAction SilentlyContinue
+        Log "Loaded predictor: $predictorDll"
+    } catch {
+        Log "Failed to load predictor: $predictorDll"
+    }
+}

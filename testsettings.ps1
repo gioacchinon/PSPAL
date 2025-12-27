@@ -23,7 +23,8 @@ function Test-Settings {
         'Editor',
         'FavColor',
         'SearchEngine',
-        'NotesPath'
+        'NotesPath',
+        'HistoryLifespan'
     )
 
     $missingVars = @()
@@ -38,7 +39,7 @@ function Test-Settings {
         return $false
     }
 
-    # Optional: validate values
+    # validate values
     if (-not (Test-Path $UserFilesDir)) {
         Write-Warning "UserFilesDir path does not exist: $UserFilesDir"
     }

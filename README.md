@@ -11,7 +11,7 @@ I use this for myself and thought it'd be usefull for others too.
 | **Feature**                | **Description**                                                                                     | **Files/Scripts**                     |
 |----------------------------|-----------------------------------------------------------------------------------------------------|---------------------------------------|
 | **Aliases Management**     | Quickly access and manage your PowerShell aliases.                                                  | `ALIASES.ps1`                         |
-| **Palette History**        | Track and review your command palette usage.                                                       | `palette_history.txt`, `palette.log`  |
+| **Palette History**        | Track and review your command palette usage. (`palette_history.txt` replaces the default powershell history file)                                                       | `palette_history.txt`, `palette.log`  |
 | **Pinning**                | Pin frequently used commands or scripts for fast access.                                          | `PINNED.ps1`                          |
 | **Profile Customization**  | Personalize your PowerShell profile.                                                               | `PROFILE.ps1`                         |
 | **Settings**               | Configure PSPAL behavior and preferences.                                                         | `SETTINGS.ps1`, `testsettings.ps1`    |
