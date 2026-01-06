@@ -1,6 +1,6 @@
 # currently msedge is the only supported browser, but ya can manually check the correct
 # command to lounch your browser, chrome should work similarly for instance.
-# remember to update also the Pin function inside Plugins/pinning.ps1
+# If you do, remember to update also the Pin function inside Plugins/pinning.ps1
 
 <#
 .SYNOPSIS

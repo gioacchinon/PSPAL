@@ -1,3 +1,4 @@
+# ⚠️ this document refers to a previous version and reults inconsistent
 # PSPAL
 
 **Palette (PSPAL)** is a customizable PowerShell environment designed to enhance productivity with aliases, command history, pinning, and modular plugins.
@@ -154,9 +155,9 @@ if (Test-Path $global:PSPal_pinnedPath) {
 
 ### Preinstalled Plugins
 
-#### **fuzzysearch.ps1**
+#### **search.ps1**
 
-Enables fuzzy search for files and commands. Provides the following functions:
+Enables search for files and commands. Provides the following functions:
 
 | **Function**            | **Description**                                                                                     |
 |-------------------------|-----------------------------------------------------------------------------------------------------|

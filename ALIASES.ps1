@@ -9,9 +9,6 @@ Set-Alias o Start-Process
 Set-Alias rh Restart-Palette
 Set-Alias np Set-TemporaryHistory
 Set-Alias yp Set-PaletteHistory
-Set-Alias nnt New-Note
-Set-Alias gnt Get-Note
-Set-Alias rnt Remove-Note
 
 # Legacy Support
 # PinApp and PinUrlAndFile have been merged into Pin.

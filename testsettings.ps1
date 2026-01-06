@@ -38,7 +38,6 @@ function Test-Settings {
         return $false
     }
 
-    # validate values
     if (-not (Test-Path $PSPal_UserFilesDir)) {
         Write-Warning "UserFilesDir path does not exist: $PSPal_UserFilesDir"
     }
