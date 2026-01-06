@@ -3,9 +3,8 @@
 $datetime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $User = [System.Environment]::UserName
 $PCName = [System.Environment]::MachineName
-$global:previousDir = Get-Location
+$global:PSPal_previousDir = Get-Location
 $currentDir = Get-Location
-$charIndex = 0
 $PaletteRoot = $PSScriptRoot
 
 # load settings from settings.ps1 if it exists
@@ -22,27 +21,39 @@ if (-not (Test-Settings)) {
 }
 
 #logging settings
-if (-not (Test-Path $logFilePath)) {
-    New-Item -Path $logFilePath -ItemType File -Force | Out-Null
+if (-not (Test-Path $global:PSPal_logFilePath)) {
+    New-Item -Path $global:PSPal_logFilePath -ItemType File -Force | Out-Null
 }
 function Log {
     param (
         [string]$action,
         [string]$level = "INFO"
     )
-    if ($logtofile) {
+    if ($global:PSPal_LogToFile) {
             $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
             $logEntry = "$timestamp [$level] | $User@$PCName | $action"
-            Add-Content -Path $logFilePath -Value $logEntry
+            Add-Content -Path $global:PSPal_logFilePath -Value $logEntry
     }
 }
 
+#history management
+if ($global:PSPal_HistoryLifespan -gt 0) {
+    $historyLifeCountPath = "$PaletteRoot\.historylifecount"
+    $historyLifeCount = [int](Get-Content $historyLifeCountPath)
+    $historyLifeCount += 1
+    if ($global:PSPal_HistoryLifespan -lt $historyLifeCount) {
+        Set-Content -Path "$PaletteRoot\Predictor\history" -Value ""
+        $historyLifeCount = 1
+    }
+    Set-Content -Path $historyLifeCountPath -Value $historyLifeCount
+}
 
 # INTERFACE -------------------------------------------------------------#
+function SayHello {
 
-$message =  "$datetime | $User@$PCName | $currentDir`n | Palette Profile Loaded |`n"
+    $message = "$datetime | $User@$PCName | $currentDir`n | Palette Profile Loaded |`n"
 
-$Welcome = @"
+    $Welcome = @"
 
  ##### #####           ###
 ..### ..###           .###
@@ -54,24 +65,28 @@ $Welcome = @"
    .....     ......   ...
 "@    
 
-$colors = @("Red", "Yellow", "Green", "Cyan", "Blue", "Magenta")
-Write-Host $message
-foreach ($line in $welcome.Split("`n")) {
-    $color = $colors[$($charIndex++ % $colors.Length)]
-    Write-Host $line -ForegroundColor $color
+    $colors = @("Red", "Yellow", "Green", "Cyan", "Blue", "Magenta")
+    $charIndex = 0
+    Write-Host $message
+    foreach ($line in $welcome.Split("`n")) {
+        $color = $colors[$($charIndex++ % $colors.Length)]
+        Write-Host $line -ForegroundColor $color
+    }
+    
 }
 
-Log $welcome
+SayHello
+Log "started"
 
 # Set a custom prompt
 function Prompt {
     $currentDir = Get-Location
-    if ($global:previousDir.path -ne $currentDir.path) {
+    if ($global:PSPal_previousDir.path -ne $currentDir.path) {
         Write-Host "`n--- $previousDir -> $currentDir ---" -ForegroundColor Yellow
-        $global:previousDir = $currentDir
+        $global:PSPal_previousDir = $currentDir
     }
     $prompt = "●"
-    Write-Host $prompt -NoNewline -ForegroundColor $FavColor
+    Write-Host $prompt -NoNewline -ForegroundColor $global:PSPal_FavColor
     return " "
 }
 
@@ -80,12 +95,7 @@ function Prompt {
 
 function Clear-Palette {
     Clear-Host
-    Write-Host "Palette cleared." -ForegroundColor Green
-    foreach ($line in $welcome.Split("`n")) {
-        $color = $colors[$($charIndex++ % $colors.Length)]
-        Write-Host $line -ForegroundColor $color
-    }
-
+    SayHello
 }
 
 function Restart-Palette {
@@ -96,28 +106,47 @@ function Restart-Palette {
 
 function Set-TemporaryHistory {
     Set-PSReadLineOption -HistorySavePath "$PaletteRoot\temp_palette_history.txt"
-    $logtofile = $false
+    $global:PSPal_LogToFile = $false 
 }
 
 function Set-PaletteHistory {
-    Set-PSReadLineOption -HistorySavePath "$PaletteRoot\palette_history.txt"
-    Remove-Item $PaletteRoot\temp_palette_history.txt -ErrorAction SilentlyContinue
+    $historyPath = "$PaletteRoot\Predictor\history"
+
+    Set-PSReadLineOption -HistorySavePath $historyPath
+    Set-PSReadLineOption -HistorySaveStyle SaveIncrementally
+
+    Remove-Item "$PaletteRoot\temp_palette_history.txt" -ErrorAction SilentlyContinue
 }
 
 # PLUGINS ---------------------------------------------------------------#
 
-. $PaletteRoot\Pluggins\fuzzysearch.ps1
+. $PaletteRoot\Plugins\search\search.ps1
 
-. $PaletteRoot\Pluggins\pinning.ps1
-if (Test-Path $pinnedPath) {
-    . $pinnedPath
+. $PaletteRoot\Plugins\pinning\pinning.ps1
+if (Test-Path $global:PSPal_pinnedPath) {
+    . $global:PSPal_pinnedPath
 }
 
-. $PaletteRoot\Pluggins\browsing.ps1
+. $PaletteRoot\Plugins\browsing\browsing.ps1
+
+. $PaletteRoot\Plugins\time\time.ps1
 
 
 # ALIASES ---------------------------------------------------------------#
 
 . $PaletteRoot\aliases.ps1
 
+# PREDICTOR -------------------------------------------------------------#
+
 Set-PaletteHistory
+
+$predictorDll = Join-Path $PaletteRoot "Predictor\PSPALPredictor.dll"
+if (Test-Path $predictorDll) {
+    try {
+        Set-PSReadLineOption -PredictionSource Plugin
+        Import-Module $predictorDll -Force -ErrorAction SilentlyContinue
+        Log "Loaded predictor: $predictorDll"
+    } catch {
+        Log "Failed to load predictor: $predictorDll"
+    }
+}

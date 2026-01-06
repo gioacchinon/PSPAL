@@ -11,7 +11,7 @@ I use this for myself and thought it'd be usefull for others too.
 | **Feature**                | **Description**                                                                                     | **Files/Scripts**                     |
 |----------------------------|-----------------------------------------------------------------------------------------------------|---------------------------------------|
 | **Aliases Management**     | Quickly access and manage your PowerShell aliases.                                                  | `ALIASES.ps1`                         |
-| **Palette History**        | Track and review your command palette usage.                                                       | `palette_history.txt`, `palette.log`  |
+| **Palette History**        | Track and review your command palette usage. (`palette_history.txt` replaces the default powershell history file)                                                       | `palette_history.txt`, `palette.log`  |
 | **Pinning**                | Pin frequently used commands or scripts for fast access.                                          | `PINNED.ps1`                          |
 | **Profile Customization**  | Personalize your PowerShell profile.                                                               | `PROFILE.ps1`                         |
 | **Settings**               | Configure PSPAL behavior and preferences.                                                         | `SETTINGS.ps1`, `testsettings.ps1`    |
@@ -144,8 +144,8 @@ Plugins are modular scripts that extend PSPAL's functionality. They are loaded i
 # PLUGINS ---------------------------------------------------------------#
 . $PaletteRoot\Plugins\fuzzysearch.ps1
 . $PaletteRoot\Plugins\pinning.ps1
-if (Test-Path $pinnedPath) {
-    . $pinnedPath
+if (Test-Path $global:PSPal_pinnedPath) {
+    . $global:PSPal_pinnedPath
 }
 . $PaletteRoot\Plugins\browsing.ps1
 ```
@@ -160,7 +160,7 @@ Enables fuzzy search for files and commands. Provides the following functions:
 
 | **Function**            | **Description**                                                                                     |
 |-------------------------|-----------------------------------------------------------------------------------------------------|
-| `FuzzySearch` [`fs`] | Searches for files matching a term in `$UserFilesDir` (or a specified directory).                     |
+| `FuzzySearch` [`fs`] | Searches for files matching a term in `$global:PSPal_UserFilesDir` (or a specified directory).                     |
 | `Start-SearchedFile`  [`fo`] | Opens the first file found by `FuzzySearch`.                                                       |
 | `Get-SearchedFile`	[`fp`] | Displays the content of the first file found by `FuzzySearch`.                                    |
 | `Edit-SearchedFile`	[`fe`] | Opens the first file found by `FuzzySearch` in your default editor.                               |
@@ -203,7 +203,7 @@ Enhances web browsing directly from the terminal.
 | `WebSearch`	[`ws`] | Performs a web search using a specified search engine and term, with an option for private browsing. |
 
 **Parameters:**
-- `-Engine`: Specifies the search engine URL (e.g., `$SearchEngine`, `$ImageSearch`). Defaults to `$SearchEngine` if not provided.
+- `-Engine`: Specifies the search engine URL (e.g., `$global:PSPal_SearchEngine`, `$ImageSearch`). Defaults to `$global:PSPal_SearchEngine` if not provided.
 
 **Example Usage:**
 ```powershell
