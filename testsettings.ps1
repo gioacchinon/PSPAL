@@ -16,15 +16,14 @@ function Test-Settings {
     }
 
     $mandatoryVars = @(
-        'UserFilesDir',
-        'pinnedPath',
-        'logFilePath',
-        'logtofile',
-        'Editor',
-        'FavColor',
-        'SearchEngine',
-        'NotesPath',
-        'HistoryLifespan'
+        'PSPal_UserFilesDir',
+        'PSPal_pinnedPath',
+        'PSPal_logFilePath',
+        'PSPal_logtofile',
+        'PSPal_Editor',
+        'PSPal_FavColor',
+        'PSPal_SearchEngine',
+        'PSPal_HistoryLifespan'
     )
 
     $missingVars = @()
@@ -40,12 +39,12 @@ function Test-Settings {
     }
 
     # validate values
-    if (-not (Test-Path $UserFilesDir)) {
-        Write-Warning "UserFilesDir path does not exist: $UserFilesDir"
+    if (-not (Test-Path $PSPal_UserFilesDir)) {
+        Write-Warning "UserFilesDir path does not exist: $PSPal_UserFilesDir"
     }
 
-    if (-not ($SearchEngine -match '\{query\}')) {
-        Write-Warning "SearchEngine URL missing '{query}' placeholder: $SearchEngine"
+    if (-not ($PSPal_SearchEngine -match '\{query\}')) {
+        Write-Warning "SearchEngine URL missing '{query}' placeholder: $PSPal_SearchEngine"
     }
 
     return $true

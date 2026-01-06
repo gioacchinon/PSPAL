@@ -1,22 +1,21 @@
 ﻿# settings for profile.ps1
-$UserFilesDir = "E:\gioac"
-$Editor = "edit"
-$pinnedPath = "$PSScriptRoot\pinned.ps1"
-$logFilePath = "$PSScriptRoot\palette.log"
-$logtofile = $True
-$FavColor = "Yellow"
-$SearchEngine = "https://www.bing.com/search?q={query}"
+$global:PSPal_UserFilesDir = "E:\gioac"
+$global:PSPal_Editor = "edit"
+$global:PSPal_pinnedPath = "$PSScriptRoot\pinned.ps1"
+$global:PSPal_logFilePath = "$PSScriptRoot\palette.log"
+$global:PSPal_LogToFile = $True
+$global:PSPal_FavColor = "Yellow"
+$global:PSPal_SearchEngine = "https://www.bing.com/search?q={query}"
 
-$HistoryLifespan = 0 #in palette instances, 0: persistent
-$predictorPinnedPath = "$PSScriptRoot\Predictor\pinned"
-
-$NotesPath = [Environment]::GetFolderPath("MyDocuments") + "\Notes\PerAsperaAdAstra"
+$global:PSPal_HistoryLifespan = 60 #in palette instances, 0: persistent
+$global:PSPal_predictorPinnedPath = "$PSScriptRoot\Predictor\pinned"
+$global:PSPal_predictorFilesPath = "$PSScriptRoot\Predictor\pinned"
 
 #ya can use this like `WebSearch "hello" $imageSearch`
-$ImageSearch = "https://www.bing.com/images/search?q={query}"
-$VideoSearch = "https://www.bing.com/videos/search?q={query}"
-$Translate = "https://www.bing.com/translator?from=&to=en&text={query}"
-$copilot = "https://copilot.microsoft.com/?q={query}"
-$lechat = "https://chat.mistral.ai/chat?q={query}"
+$global:ImageSearch = "https://www.bing.com/images/search?q={query}"
+$global:VideoSearch = "https://www.bing.com/videos/search?q={query}"
+$global:Translate = "https://www.bing.com/translator?from=&to=en&text={query}"
+$global:copilot = "https://copilot.microsoft.com/?q={query}"
+$global:lechat = "https://chat.mistral.ai/chat?q={query}"
 
-$ptemp = [Environment]::GetFolderPath("Desktop") + "\Personal Temp"
+$global:ptemp = [Environment]::GetFolderPath("Desktop") + "\Personal Temp"
