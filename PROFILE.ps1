@@ -41,7 +41,7 @@ function Log {
 #history management
 if ($global:PSPal_HistoryLifespan -gt 0) {
     $historyLifeCountPath = "$PaletteRoot\.historylifecount"
-    $historyLifeCount = [int](Get-Content $historyLifeCountPath)
+    $historyLifeCount = if (Test-Path $historyLifeCountPath){[int](Get-Content $historyLifeCountPath)} else {0}
     $historyLifeCount += 1
     if ($global:PSPal_HistoryLifespan -lt $historyLifeCount) {
         Set-Content -Path "$PaletteRoot\Predictor\history" -Value ""
