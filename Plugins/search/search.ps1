@@ -1,3 +1,5 @@
+. $Paletteroot\plugins\search\selectFromList.ps1
+
 <#
 .SYNOPSIS
     Performs a fuzzy search for files matching a search term

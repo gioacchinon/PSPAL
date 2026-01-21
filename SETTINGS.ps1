@@ -1,11 +1,12 @@
 ﻿# settings for profile.ps1
 $global:PSPal_UserFilesDir = "$env:USERPROFILE"
 $global:PSPal_Editor = "notepad"
-$global:PSPal_pinnedPath = "$PSScriptRoot\pinned.ps1"
-$global:PSPal_logFilePath = "$PSScriptRoot\palette.log"
+$global:PSPal_logFilePath = "$PSScriptRoot\log\palette.log"
 $global:PSPal_LogToFile = $True
 $global:PSPal_FavColor = "Blue"
 $global:PSPal_SearchEngine = "https://www.bing.com/search?q={query}"
+
+$global:PSPal_PinnedPath = "$PSScriptRoot\plugins\pinning\pinned.ps1"
 
 $global:PSPal_HistoryLifespan = 0 #in palette instances, 0: persistent
 $global:PSPal_predictorPinnedPath = "$PSScriptRoot\Predictor\pinned"

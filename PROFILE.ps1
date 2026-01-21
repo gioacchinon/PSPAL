@@ -7,6 +7,8 @@ $global:PSPal_previousDir = Get-Location
 $currentDir = Get-Location
 $PaletteRoot = $PSScriptRoot
 
+$PSPal_FunctionsBeforeLoading = Get-ChildItem Function:\ | Select-Object -ExpandProperty Name
+
 # load settings from settings.ps1 if it exists
 
 $settingsPath = "$PSScriptRoot\settings.ps1"
@@ -51,27 +53,19 @@ if ($global:PSPal_HistoryLifespan -gt 0) {
 # INTERFACE -------------------------------------------------------------#
 function SayHello {
 
-    $message = "$datetime | $User@$PCName | $currentDir`n | Palette Profile Loaded |`n"
+    $message = "| $datetime | $User@$PCName | $currentDir |`n| Palette Profile Loaded |`n"
 
-    $Welcome = @"
+    $Welcome = @'
+··············································
+:    88""Yb .dP"Y8 88""Yb    db    88        :
+:    88__dP `Ybo." 88__dP   dPYb   88        :
+:    88"""  o.`Y8b 88"""   dP__Yb  88  .o    :
+:    88     8bodP' 88     dP""""Yb 88ood8    :
+··············································
+'@    
 
- ##### #####           ###
-..### ..###           .###
- ..### ###    ######  .###
-  ..#####    ###..### .###
-   ..###    .### .### .###
-    .###    .### .### ... 
-    #####   ..######   ###
-   .....     ......   ...
-"@    
-
-    $colors = @("Red", "Yellow", "Green", "Cyan", "Blue", "Magenta")
-    $charIndex = 0
     Write-Host $message
-    foreach ($line in $welcome.Split("`n")) {
-        $color = $colors[$($charIndex++ % $colors.Length)]
-        Write-Host $line -ForegroundColor $color
-    }
+    Write-Host $Welcome -ForegroundColor $global:PSPal_FavColor
     
 }
 
@@ -99,8 +93,12 @@ function Clear-Palette {
 }
 
 function Restart-Palette {
-    . $PaletteRoot\profile.ps1
+    foreach ($function in $global:PSPal_FunctionsLoaded) {
+        Remove-Item Function:\$function
+    }
     Clear-History
+
+    . $PaletteRoot\PROfILE.ps1
     log "Palette restarted."
 }
 
@@ -129,8 +127,6 @@ if (Test-Path $global:PSPal_pinnedPath) {
 
 . $PaletteRoot\Plugins\browsing\browsing.ps1
 
-. $PaletteRoot\Plugins\time\time.ps1
-
 
 # ALIASES ---------------------------------------------------------------#
 
@@ -143,10 +139,13 @@ Set-PaletteHistory
 $predictorDll = Join-Path $PaletteRoot "Predictor\PSPALPredictor.dll"
 if (Test-Path $predictorDll) {
     try {
-        Set-PSReadLineOption -PredictionSource Plugin
+        Set-PSReadLineOption -PredictionSource HistoryAndPlugin
         Import-Module $predictorDll -Force -ErrorAction SilentlyContinue
         Log "Loaded predictor: $predictorDll"
     } catch {
         Log "Failed to load predictor: $predictorDll"
     }
 }
+
+$PSPal_FunctionsAfterLoading = Get-ChildItem Function:\ | Select-Object -ExpandProperty Name
+$global:PSPal_FunctionsLoaded = Compare-Object $PSPal_FunctionsBeforeLoading $PSPal_FunctionsAfterLoading -PassThru | Where-Object { $_ -notin $PSPal_FunctionsBeforeLoading }
