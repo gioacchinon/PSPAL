@@ -23,7 +23,9 @@ function Test-Settings {
         'PSPal_Editor',
         'PSPal_FavColor',
         'PSPal_SearchEngine',
-        'PSPal_HistoryLifespan'
+        'PSPal_SearchEngines',
+        'PSPal_HistoryLifespan',
+        'PSPal_BrowserProvider'
     )
 
     $missingVars = @()
@@ -38,13 +40,24 @@ function Test-Settings {
         return $false
     }
 
+    # validate values
     if (-not (Test-Path $PSPal_UserFilesDir)) {
         Write-Warning "UserFilesDir path does not exist: $PSPal_UserFilesDir"
     }
 
-    if (-not ($PSPal_SearchEngine -match '\{query\}')) {
-        Write-Warning "SearchEngine URL missing '{query}' placeholder: $PSPal_SearchEngine"
+    if ($PSPal_SearchEngines -isnot [hashtable]) {
+        Write-Warning "SearchEngines must be a hashtable"
+    } else {
+        if ($PSPal_SearchEngine -notin $PSPal_SearchEngines.Keys) {
+            Write-Error "SearchEngine '$PSPal_SearchEngine' is not a key in SearchEngines"
+            return $false
+        }
+        foreach ($engine in $PSPal_SearchEngines.Values) {
+            if ($engine -notmatch '\{query\}') {
+                Write-Warning "SearchEngine URL missing '{query}' placeholder: $engine"
+            }
+        }
     }
 
     return $true
-}
+} 

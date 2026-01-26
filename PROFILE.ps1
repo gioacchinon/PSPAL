@@ -76,7 +76,7 @@ Log "started"
 function Prompt {
     $currentDir = Get-Location
     if ($global:PSPal_previousDir.path -ne $currentDir.path) {
-        Write-Host "`n--- $previousDir -> $currentDir ---" -ForegroundColor Yellow
+        Write-Host "`n+++++ 📂 $global:PSPal_previousDir -> $currentDir +++++" -ForegroundColor Yellow
         $global:PSPal_previousDir = $currentDir
     }
     $prompt = "●"

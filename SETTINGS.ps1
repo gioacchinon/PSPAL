@@ -4,7 +4,6 @@ $global:PSPal_Editor = "notepad"
 $global:PSPal_logFilePath = "$PSScriptRoot\log\palette.log"
 $global:PSPal_LogToFile = $True
 $global:PSPal_FavColor = "Blue"
-$global:PSPal_SearchEngine = "https://www.bing.com/search?q={query}"
 
 $global:PSPal_PinnedPath = "$PSScriptRoot\plugins\pinning\pinned.ps1"
 
@@ -12,9 +11,20 @@ $global:PSPal_HistoryLifespan = 0 #in palette instances, 0: persistent
 $global:PSPal_predictorPinnedPath = "$PSScriptRoot\Predictor\pinned"
 $global:PSPal_predictorFilesPath = "$PSScriptRoot\Predictor\pinned"
 
-#ya can use this like `WebSearch "hello" $imageSearch`
-$global:ImageSearch = "https://www.bing.com/images/search?q={query}"
-$global:VideoSearch = "https://www.bing.com/videos/search?q={query}"
-$global:Translate = "https://www.bing.com/translator?from=&to=en&text={query}"
-$global:copilot = "https://copilot.microsoft.com/?q={query}"
-$global:lechat = "https://chat.mistral.ai/chat?q={query}"
+
+$global:PSPal_SearchEngine = "bing"
+$global:PSPal_SearchEngines = @{
+    "bing"     = "https://www.bing.com/search?q={query}"
+    "google"   = "https://www.google.com/search?q={query}"
+
+    "image"    = "https://www.bing.com/images/search?q={query}"
+    "video"    = "https://www.bing.com/videos/search?q={query}"
+    "translate" = "https://www.bing.com/translator?from=&to=en&text={query}"
+
+}
+
+$global:PSPal_BrowserProvider = [PSCustomObject]@{
+  Command = "msedge"
+  URLLauncher = "--app=<URL>"
+  PrivateTag = "--inPrivate"
+}

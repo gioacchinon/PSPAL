@@ -34,11 +34,10 @@ function FuzzySearch {
         return
     }
 
-    $files = Get-ChildItem $directory -Recurse -File | Where-Object { $_.Name -like "*$searchTerm*" }
+    $files = Get-ChildItem $directory -Recurse | Where-Object { $_.Name -like "*$searchTerm*" }
     if ($files) {
-        $files | ForEach-Object { Write-Host $_.FullName -ForegroundColor Cyan }
         Log "FuzzySearch found files matching '$searchTerm'."
-        return $files.FullName
+        return $files
     } else {
         Write-Host "No files found matching '$searchTerm'." -ForegroundColor Red
         Log "FuzzySearch found no files matching '$searchTerm'." "WARNING"

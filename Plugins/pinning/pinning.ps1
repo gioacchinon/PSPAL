@@ -76,7 +76,9 @@ function Pin {
     }
 
     if ($isURL) {
-        $entry = "start-process 'msedge' --app='$inputItem'"
+        $browser = $global:PSPal_BrowserProvider
+        $urlArg = $browser.URLLauncher -replace "<URL>", $inputItem
+        $entry = "start-process '$($browser.Command)' -ArgumentList '$urlArg'"
     }
     elseif ($isPs1) {
         $entry = "pwsh -File '$inputItem'"

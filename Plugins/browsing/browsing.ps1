@@ -1,13 +1,10 @@
-# currently msedge is the only supported browser, but ya can manually check the correct
-# command to lounch your browser, chrome should work similarly for instance.
-# If you do, remember to update also the Pin function inside Plugins/pinning.ps1
 
 <#
 .SYNOPSIS
-    Launches a website in Microsoft Edge
+    Launches a website in set browser
 
 .DESCRIPTION
-    Opens the specified URL in Microsoft Edge browser. Supports both normal and private browsing modes.
+    Opens the specified URL in set browser. Supports both normal and private browsing modes.
 
 .PARAMETER URL
     The website URL to open. If not provided, Edge launches normally.
@@ -30,14 +27,20 @@ function Start-Website {
     )
 
     try {
-        #if no Url is provided msedge will launch normally 
+        $browser = $global:PSPal_BrowserProvider
+        $arguments = @()
+        
         if ($Private) {
-            Start-Process 'msedge' -ArgumentList "--inPrivate", --app="$url"
+            $arguments += $browser.PrivateTag
         }
-        else {
-            Start-Process 'msedge' --app="$url"
-            Log "Opened website '$URL'."
+        
+        if ($URL) {
+            $urlArg = $browser.URLLauncher -replace "<URL>", $url
+            $arguments += $urlArg
         }
+        
+        Start-Process $browser.Command -ArgumentList $arguments
+        Log "Opened website '$URL'."
     }
     catch {
         Write-Host "couldn't launch the browser" -ForegroundColor Yellow
@@ -64,17 +67,17 @@ function Start-Website {
     Switch to open the search results in private browsing mode.
 
 .EXAMPLE
-    WebSearch "PowerShell functions"
-    Searches for PowerShell functions using default search engine
+    WebSearch "PowerShel"
+    Searches for PowerShell using default search engine
 
 .EXAMPLE
-    WebSearch "PowerShell functions" -private
+    WebSearch "PowerShell" -private
     Searches and opens results in private browsing mode
 #>
 function WebSearch {
     param (
         [string]$searchTerm,
-        [string]$engine = $global:PSPal_SearchEngine,
+        [string]$engineId = $global:PSPal_SearchEngine,
 		[switch]$private
     )
     if (-not $searchTerm) {
@@ -82,6 +85,8 @@ function WebSearch {
         Log "WebSearch called without a search term." "WARNING"
         return
     }
+
+    $engine = $global:PSPal_SearchEngines[$engineid]
 
     $url = $engine -replace "{query}", [uri]::EscapeDataString($searchTerm)
 	if ($private) {
