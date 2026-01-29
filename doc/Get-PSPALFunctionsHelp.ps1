@@ -37,9 +37,23 @@ param(
 # Get the PSPAL root directory (parent of doc folder)
 $PSPALRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
-# Find all PowerShell files
-$psFiles = Get-ChildItem -Path $PSPALRoot -Filter "*.ps1" -Recurse -Exclude "*.ahk" | 
-    Where-Object { $_.FullName -notlike "*\.git*" }
+# Find all PowerShell files with proper error handling
+$psFiles = @()
+try {
+    $psFiles = Get-ChildItem -Path $PSPALRoot -Filter "*.ps1" -Recurse -Force -ErrorAction SilentlyContinue | 
+        Where-Object { 
+            $_.FullName -notlike "*\.git*" -and 
+            $_.FullName -notlike "*\node_modules*" -and
+            $_.Name -ne "*.ahk"
+        }
+}
+catch {
+    Write-Warning "Some directories could not be accessed: $_"
+}
+
+if ($null -eq $psFiles) {
+    $psFiles = @()
+}
 
 # Dictionary to store function information
 $functions = @{}
@@ -56,11 +70,11 @@ foreach ($file in $psFiles) {
         foreach ($match in $functionMatches) {
             $funcName = $match.Groups[1].Value
             
-            # Try to get comment-based help
-            $helpMatch = [regex]::Match($content, "(?s)\.\s*<#(.+?)#>.*?function\s+$funcName\s*{", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+            # Try to get comment-based help (look for <# ... #> before function declaration)
+            $helpMatch = [regex]::Match($content, "(?s)<#(.+?)#>\s*function\s+$funcName\s*{", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
             
             if ($helpMatch.Success) {
-                $helpText = $helpMatch.Groups[1].Value
+                $helpText = $helpMatch.Groups[1].Value.Trim()
             } else {
                 $helpText = "(No help available)"
             }

@@ -71,7 +71,7 @@ see [`doc/functions.md`](doc/functions.md)
 
 Plugins live in the `Plugins/` folder. Current simple plugins include:
 
-- `browsing` — open web pages with Microsoft Edge (kiosk mode option)
+- `browsing` — open web pages with configured browser
 - `pinning` — pin/unpin commands and items to the predictor
 - `search` — a small file search helper
 
