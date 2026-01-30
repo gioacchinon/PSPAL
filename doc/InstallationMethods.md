@@ -8,7 +8,7 @@
    - Clone this repository to a location of your choice (e.g., `C:\Tools\PSPAL` or `D:\PowerShell\PSPAL`)
    - Alternatively, download the ZIP file and extract it
 
-	> the location will be referred below, in this document, as `{PSPal root}`
+	> the location will be referred below, in this document, as `{PSPAL root}`
 
 2. **Set Environment Variable (Optional but Recommended)**
    - Create an environment variable `PSPAL_HOME` pointing to your installation directory
@@ -36,7 +36,7 @@
 
 ## Windows Terminal
 
-> installer [`install/wt.ps1`](/install/generic.ps1) with `ForWindowsTerminal` set to `true`
+> installer [`install/generic.ps1`](/install/generic.ps1) with `ForWindowsTerminal` set to `true`
 
 ### Manual Steps
 
@@ -45,14 +45,14 @@
    - Copy the entire PSPAL folder there
    - *(Recommended)* Save the path in an environment variable (e.g. `PSPAL_HOME`) for easy reference in scripts
 
-		> the location will be referred below, in this document, as `{PSPal root}`
+		> the location will be referred below, in this document, as `{PSPAL root}`
 
 2. **Configure Windows Terminal Profile**~
    - Open Windows Terminal Settings (Ctrl + ,)
 	- Under `Profiles` click `Add a new profile`, then `+ New empty profile` 
 	- Set `Command Line` to 'pwsh.exe', or locate powershell executable, `icon` to '{PSPal root}\icons\icon.ico'
 
-	- Click `Open JSON file` one the lower left
+	- Click `Open JSON file` on the lower left
    - Locate your PowerShell profile in the JSON
    - Add the environment variable to your profile configuration:
      ```json
